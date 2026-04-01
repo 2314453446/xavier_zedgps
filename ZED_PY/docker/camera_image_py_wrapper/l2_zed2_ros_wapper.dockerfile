@@ -100,10 +100,14 @@ RUN chmod +x /etc/profile.d/ros2_setup.sh && \
     (grep -qxF 'source /etc/profile.d/ros2_setup.sh' /etc/bash.bashrc || \
      echo 'source /etc/profile.d/ros2_setup.sh' >> /etc/bash.bashrc)
 
-COPY enterpoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
 
-WORKDIR ${ROS_WS}
-
-ENTRYPOINT ["/entrypoint.sh"]
+ADD 10_nvidia.json /etc/glvnd/egl_vendor.d/10_nvidia.json
+RUN chmod 644 /etc/glvnd/egl_vendor.d/10_nvidia.json
+ADD nvidia_icd.json /etc/vulkan/icd.d/nvidia_icd.json
+RUN chmod 644 /etc/vulkan/icd.d/nvidia_icd.json
+ENV NVIDIA_VISIBLE_DEVICES=${NVIDIA_VISIBLE_DEVICES:-all}
+ENV NVIDIA_DRIVER_CAPABILITIES=${NVIDIA_DRIVER_CAPABILITIES:+$NVIDIA_DRIVER_CAPABILITIES,}graphics
+COPY env.sh /etc/profile.d/ade_env.sh
+COPY enterpoint.sh /ade_entrypoint
+ENTRYPOINT ["/ade_entrypoint"]
 CMD ["/bin/bash", "-c", "trap 'exit 147' TERM; tail -f /dev/null & while wait ${!}; test $? -ge 128; do true; done"]

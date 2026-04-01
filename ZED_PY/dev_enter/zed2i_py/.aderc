@@ -14,6 +14,8 @@ export ADE_DOCKER_RUN_ARGS="--runtime nvidia \
  -e XAUTHORITY=${HOME}/.Xauthority \
  -v /tmp/.X11-unix:/tmp/.X11-unix \
  -e DISPLAY \
+
+ -v /home/tuolong/Documents/project/ws_xavier/third_party/zed/resources:/usr/local/zed/resources
 "
 
 export ADE_IMAGES="openzed-env:aarch64_ros2_foxy_zed_latest"
