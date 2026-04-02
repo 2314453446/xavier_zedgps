@@ -129,10 +129,27 @@ RUN /bin/bash -lc "source /opt/ros/$ROS_DISTRO/install/setup.bash && \
 
 WORKDIR /root/ros2_ws
 
-# Setup environment variables 
-COPY ros_entrypoint_jetson.sh /sbin/ros_entrypoint.sh
-RUN sudo chmod 755 /sbin/ros_entrypoint.sh
+# # Setup environment variables 
+# COPY ros_entrypoint_jetson.sh /sbin/ros_entrypoint.sh
+# RUN sudo chmod 755 /sbin/ros_entrypoint.sh
 
-ENTRYPOINT ["/sbin/ros_entrypoint.sh"]
-CMD ["bash"]
+# ENTRYPOINT ["/sbin/ros_entrypoint.sh"]
+# CMD ["bash"]
+
+ADD 10_nvidia.json /etc/glvnd/egl_vendor.d/10_nvidia.json
+RUN chmod 644 /etc/glvnd/egl_vendor.d/10_nvidia.json
+ADD nvidia_icd.json /etc/vulkan/icd.d/nvidia_icd.json
+RUN chmod 644 /etc/vulkan/icd.d/nvidia_icd.json
+ENV NVIDIA_VISIBLE_DEVICES=${NVIDIA_VISIBLE_DEVICES:-all}
+ENV NVIDIA_DRIVER_CAPABILITIES=${NVIDIA_DRIVER_CAPABILITIES:+$NVIDIA_DRIVER_CAPABILITIES,}graphics
+
+COPY env.sh /etc/profile.d/ade_env.sh
+COPY entrypoint.sh /ade_entrypoint
+
+RUN chmod 755 /ade_entrypoint && \
+    chmod 644 /etc/profile.d/ade_env.sh && \
+    echo 'source /etc/profile.d/ade_env.sh' >> /etc/bash.bashrc
+
+ENTRYPOINT ["/ade_entrypoint"]
+CMD ["/bin/bash", "-c", "trap 'exit 147' TERM; tail -f /dev/null & while wait ${!}; test $? -ge 128; do true; done"]
 
