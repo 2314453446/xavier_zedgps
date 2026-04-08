@@ -1,0 +1,92 @@
+# 手动启动 gpsd 笔记
+
+## 1）加载环境
+source ~/.bashrc
+
+## 2）查看 GNSS 串口设备
+ls /dev/ttyACM* /dev/ttyUSB* 2>/dev/null
+
+正常情况下会看到类似：
+/dev/ttyACM0
+
+如果设备不是 /dev/ttyACM0，后面命令中的设备名要改成实际值。
+
+## 3）手动启动 gpsd
+pkill gpsd 2>/dev/null || true
+/usr/local/sbin/gpsd -nG -s 115200 /dev/ttyACM0
+
+## 4）检查 gpsd 是否启动成功
+pgrep -a gpsd
+ss -lntp | grep 2947
+
+## 5）查看 gpsd 输出的数据
+gpspipe -w -x 5
+
+如果看到类似下面内容，说明链路已经通了：
+{"class":"DEVICES",...}
+{"class":"TPV","device":"/dev/ttyACM0","mode":1}
+
+## 6）图形界面查看
+xgps
+
+## 一条命令直接启动
+source ~/.bashrc
+pkill gpsd 2>/dev/null || true
+/usr/local/sbin/gpsd -nG -s 115200 /dev/ttyACM0
+
+## 一条命令启动后立刻验证
+source ~/.bashrc
+pkill gpsd 2>/dev/null || true
+/usr/local/sbin/gpsd -nG -s 115200 /dev/ttyACM0
+sleep 1
+gpspipe -w -x 5
+/
+## 状态判断
+mode=1
+{"class":"TPV","device":"/dev/ttyACM0","mode":1}
+表示：gpsd 已经通了，但当前没有定位成功。
+
+mode=2
+{"class":"TPV","device":"/dev/ttyACM0","mode":2}
+表示：2D 定位成功。
+
+mode=3
+{"class":"TPV","device":"/dev/ttyACM0","mode":3}
+表示：3D 定位成功。
+
+## 停止 gpsd
+pkill gpsd
+
+## 备注
+当前使用的手动启动命令是：
+/usr/local/sbin/gpsd -nG -s 115200 /dev/ttyACM0
+
+如果后面设备变成 /dev/ttyUSB0，改成：
+/usr/local/sbin/gpsd -nG -s 115200 /dev/ttyUSB0
+
+# gpsd的RTK设置命令
+gpsd -nG nrtip://sibl2023:sibl@RTS2.ngii.go.kr:2101/VRS-RTCM32 -s 115200 /dev/ttyACM0
+
+-------------------mosaic-5 usb网络共享
+sudo nmcli c delete "Wired connection 2"
+
+sudo nmcli c add con-name mosaic-share type ethernet ifname usb1 ipv4.method shared ipv6.method ignore
+
+sudo nmcli c up mosaic-share
+
+ip neigh
+---------------------------gpsd 手动启动
+
+# 1) 看系统有没有识别出 mosaic 的串口
+ls -l /dev/ttyACM* /dev/ttyUSB* 2>/dev/null
+
+# 2) 看内核有没有创建 CDC-ACM 设备
+dmesg | grep -Ei 'cdc_acm|ttyACM|usb' | tail -n 30
+
+# 3) 先停掉系统自带的 gpsd，避免和你手动启动的实例打架
+sudo systemctl stop gpsd.socket gpsd.service
+
+# 4) 手动把 gpsd 绑定到设备
+sudo gpsd -N -n -D 4 /dev/ttyACM0
+
+

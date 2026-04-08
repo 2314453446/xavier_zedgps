@@ -1,0 +1,23 @@
+export ADE_NAME=camera_ros
+
+export ADE_DOCKER_RUN_ARGS="--runtime nvidia \
+ --cap-add=SYS_PTRACE \
+ --privileged \
+ --net=host \
+ --hostname camera_py \
+ --add-host camera:127.0.0.1 \
+ -v /dev:/dev \
+ -e ROS_DOMAIN_ID=0 \
+ -e NVIDIA_VISIBLE_DEVICES=all \
+ -e NVIDIA_DRIVER_CAPABILITIES=all \
+ -v ${HOME}/.Xauthority:${HOME}/.Xauthority:ro \
+ -e XAUTHORITY=${HOME}/.Xauthority \
+ -v /tmp/.X11-unix:/tmp/.X11-unix \
+ -v /etc/localtime:/etc/localtime:ro \
+ -e DISPLAY \
+ -e FASTDDS_BUILTIN_TRANSPORTS=UDPv4 \
+ -e RMW_IMPLEMENTATION=rmw_fastrtps_cpp \
+
+"
+
+export ADE_IMAGES="zed_ros2_l4t_image:latest"
