@@ -19,7 +19,7 @@
 ########################################################################
 
 """
-    This sample shows how to record the position of the ZED camera 
+    This sample shows how to record the position of the ZED camera
     and displays it in a OpenGL window.
 """
 
@@ -29,16 +29,16 @@ from gnss_reader.gpsd_reader import GPSDReader
 from exporter.gnss_saver import GNSSSaver, get_current_datetime
 import exporter.KMLExporter as export
 from signal import signal, SIGINT
-import sys 
+import sys
 
 
 
-is_running = True 
+is_running = True
 #Handler to deal with CTRL+C properly
 def handler(signal_received, frame):
     global is_running
-    is_running = False 
-    
+    is_running = False
+
 signal(SIGINT, handler)
 
 def main():
@@ -46,7 +46,7 @@ def main():
     # Open the camera
     zed = sl.Camera()
     init_params = sl.InitParameters()
-    init_params.sdk_verbose = 1 
+    init_params.sdk_verbose = 1
     status = zed.open(init_params)
     if status != sl.ERROR_CODE.SUCCESS:
         print("[ZED][ERROR] Camera Open : "+repr(status)+". Exit program.")
@@ -57,7 +57,7 @@ def main():
         zed.close()
         print("[ZED][ERROR] Can't start tracking of camera : "+repr(status)+". Exit program.")
         exit()
-    
+
     #Enable SVO recording :
     svo_path = "ZED_SN"+str(zed.get_camera_information().serial_number)+"_"+get_current_datetime()+".svo"
     returned_state = zed.enable_recording(sl.RecordingParameters(svo_path,sl.SVO_COMPRESSION_MODE.H264_LOSSLESS))
@@ -65,7 +65,7 @@ def main():
         print("Recording ZED : "+repr(status)+". Exit program.")
         zed.close()
         exit()
-    
+
     # Create Fusion object:
     fusion = sl.Fusion()
     init_fusion_param = sl.InitFusionParameters()
@@ -90,7 +90,7 @@ def main():
     fusion.subscribe(uuid,configuration,sl.Transform(0,0,0))
     # Enable positional tracking for Fusion object
     positional_tracking_fusion_parameters = sl.PositionalTrackingFusionParameters()
-    positional_tracking_fusion_parameters.enable_GNSS_fusion = True 
+    positional_tracking_fusion_parameters.enable_GNSS_fusion = True
     gnss_calibration_parameters = {
         "target_yaw_uncertainty" : 0.1,
         "enable_translation_uncertainty_target" : False,
@@ -109,7 +109,8 @@ def main():
     gnss_data_saver = GNSSSaver(zed)
     while is_running and viewer.isAvailable():
         # Grab camera:
-        if zed.grab() <= sl.ERROR_CODE.SUCCESS:
+        err = zed.grab()
+        if err == sl.ERROR_CODE.SUCCESS:
             zed_pose = sl.Pose()
             # You can still use the classical getPosition for your application, just not that the position returned by this method
             # is the position without any GNSS/cameras fusion
@@ -117,12 +118,15 @@ def main():
         # Get GNSS data:
         status, input_gnss = gnss_reader.grab()
         if status == sl.ERROR_CODE.SUCCESS:
+            print("STAGE2: grab ok")
             # Display it on the Live Server
             viewer.updateRawGeoPoseData(input_gnss)
 
             # Publish GNSS data to Fusion
             ingest_error = fusion.ingest_gnss_data(input_gnss)
+            print("STAGE3: fusion ingest =", ingest_error)
             if ingest_error == sl.FUSION_ERROR_CODE.SUCCESS:
+                print("STAGE4: call addGNSSData")
                 # Save current GNSS data to KML file:
                 latitude, longitude, altitude = input_gnss.get_coordinates(False)
                 coordinates = {
@@ -146,8 +150,8 @@ def main():
             translation = fused_position.get_translation(py_translation)
             text_rotation = str((round(rotation[0], 2), round(rotation[1], 2), round(rotation[2], 2)))
             text_translation = str((round(translation.get()[0], 2), round(translation.get()[1], 2), round(translation.get()[2], 2)))
-            viewer.updatePoseData(fused_position.pose_data(),text_translation,text_rotation, current_state) 
-            # Get position into the GNSS coordinate system - this needs a initialization between CAMERA 
+            viewer.updatePoseData(fused_position.pose_data(),text_translation,text_rotation, current_state)
+            # Get position into the GNSS coordinate system - this needs a initialization between CAMERA
             # and GNSS. When the initialization is finish the getGeoPose will return sl.POSITIONAL_TRACKING_STATE.OK
             current_geopose = sl.GeoPose()
             current_geopose_satus = fusion.get_geo_pose(current_geopose)
@@ -165,7 +169,7 @@ def main():
     gnss_data_saver.saveAllData()
     fusion.close()
     zed.close()
-    
-    
+
+
 if __name__ == '__main__':
-    main() 
+    main()

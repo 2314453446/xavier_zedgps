@@ -35,7 +35,7 @@ class GNSSSaver:
         self.file_path = "GNSS_"+self.current_date+".json"
         self.all_gnss_data = []
         self._zed = zed
-        
+
     def addGNSSData(self, gnss_data):
         if self._zed is not None:
             data = sl.SVOData()
@@ -44,6 +44,7 @@ class GNSSSaver:
             data.timestamp_ns = gnss_data.ts
 
             self._zed.ingest_data_into_svo(data)
+
 
         else:
             self.all_gnss_data.append(gnss_data)
