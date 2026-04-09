@@ -1,0 +1,9 @@
+zed:
+  image_topic: "/zed/zed_node/rgb/image_rect_color"
+  camera_info_topic: "/zed/zed_node/rgb/camera_info"
+  pointcloud_topic: "/zed/zed_node/point_cloud/cloud_registered"
+
+runtime:
+  report_interval_sec: 2.0
+  timeout_warn_sec: 1.0
+  node_name: "stage1_data_probe"

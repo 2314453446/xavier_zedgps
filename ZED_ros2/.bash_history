@@ -153,3 +153,13 @@ ros2 daemon start
 ros2 node list
 sudo source /root/ros2_ws/install/setup.bash
 exit
+rviz2
+rviz
+ros2 topic list
+date\
+date
+exit
+export FASTDDS_BUILTIN_TRANSPORTS=UDPv4 
+export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+ros2 topic list
+exit 
