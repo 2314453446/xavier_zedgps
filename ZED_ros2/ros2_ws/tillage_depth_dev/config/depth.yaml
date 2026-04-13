@@ -1,0 +1,16 @@
+depth:
+  # 是否把负深度截断到 0
+  clamp_negative_to_zero: true
+
+  # 对最终 depth 做一阶低通滤波
+  smooth_alpha: 0.3
+
+  # 当前阶段约定：
+  # depth = max(0, -signed_dist)
+  # 也就是 signed_dist < 0 时表示“入地”
+  use_negative_signed_as_penetration: true
+
+runtime:
+  node_name: stage5_depth_estimator
+  report_interval_sec: 1.0
+  show_debug_window: true

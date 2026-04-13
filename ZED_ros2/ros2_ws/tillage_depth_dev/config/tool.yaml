@@ -1,0 +1,9 @@
+tool:
+  # 犁耙测量点在板坐标系 B 下的位置，单位：米
+  # 这里只先放一个示例值，后面你需要按真实安装关系测量后替换
+  point_in_board_m: [0.00, 0.18, 0.135]
+
+runtime:
+  node_name: stage3_tool_point
+  report_interval_sec: 1.0
+  show_window: true

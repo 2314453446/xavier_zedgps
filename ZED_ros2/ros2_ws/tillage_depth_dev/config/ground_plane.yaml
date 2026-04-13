@@ -1,0 +1,25 @@
+ground:
+  roi_mode: pixel_rect
+
+  u_min: 80
+  u_max: 560
+  v_min: 180
+  v_max: 359
+
+  depth_min_m: 0.1
+  depth_max_m: 5.0
+
+  ransac_threshold_m: 0.03
+  ransac_max_iterations: 300
+  min_inliers: 80
+  max_points_for_ransac: 20000
+
+runtime:
+  node_name: stage4_ground_plane
+  report_interval_sec: 1.0
+  show_debug_window: true
+
+  # 新增：局部点云 + 平面 3D 调试窗口
+  show_plane_3d_viewer: true
+  plane_patch_extent_m: 0.4
+  viewer_max_draw_points: 3000

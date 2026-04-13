@@ -1,0 +1,10 @@
+board:
+  method: apriltag
+  family: tag36h11
+  tag_size_m: 0.16
+  debug_draw: true
+
+runtime:
+  node_name: stage2_board_pose
+  report_interval_sec: 1.0
+  show_window: true
